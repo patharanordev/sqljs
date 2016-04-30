@@ -22,6 +22,22 @@ var data = [{
 
 var sqljs = require('./sql.js');
 sqljs.setPool('localhost', 'root', 'username', 'database', 'myport');
+
+	/*
+	 *	do domething
+	 */
+	
+// Add some data to databasse
+sqljs.insert(data);
+
+	/*
+	 *	do domething
+	 */
+	 
+// Before finish your process, don't forget end pool
+sqljs.endPool();
+
+// Or using callback function
 sqljs.insert(data, function(){
 	sqljs.endPool();
 });
