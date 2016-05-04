@@ -20,7 +20,7 @@ var sqljs = function(){
 			//console.log('Insert success!');
 			log.append('./log/', 'dblog.txt', 'Insert success!', true);
 			
-			connection.release();
+			connection.destroy();//release();
 
 			if(typeof callback === 'function') {
 				callback();
@@ -148,15 +148,33 @@ var sqljs = function(){
 						for(var i=0; i<data.length; i++){
 							//console.log(data[i].date);
 
-							var insert = "insert ignore into `" + table + "`" +
-								"(`date`,`open`,`high`,`low`,`close`,`volume`,`avg`) select " +
-											"'" + data[i].date + "'," +
-											"'" + data[i].open + "'," +
-											"'" + data[i].high + "'," +
-											"'" + data[i].low + "'," +
-											"'" + data[i].close + "'," +
-											"'" + data[i].volume + "'," +
-											"'" + data[i].avg + "'";
+							// var insert = "insert ignore into `" + table + "`" +
+							// 	"(`date`,`open`,`high`,`low`,`close`,`volume`,`avg`) select " +
+							// 				"'" + data[i].date + "'," +
+							// 				"'" + data[i].open + "'," +
+							// 				"'" + data[i].high + "'," +
+							// 				"'" + data[i].low + "'," +
+							// 				"'" + data[i].close + "'," +
+							// 				"'" + data[i].volume + "'," +
+							// 				"'" + data[i].avg + "'";
+
+							var insert = 
+								"insert into `" + table + "` (`date`,`open`,`high`,`low`,`close`,`volume`,`avg`) " + 
+								"select `tmp`.`date`, `tmp`.`open`, `tmp`.`high`, `tmp`.`low`, `tmp`.`close`, `tmp`.`volume`, `tmp`.`avg` " + 
+								"from (" +
+								    "select '" + data[i].date + "' as `date`, " +
+								           "'" + data[i].open + "' as `open`, " +
+								           "'" + data[i].high + "' as `high`, " + 
+								           "'" + data[i].low + "' as `low`, " + 
+								           "'" + data[i].close + "' as `close`, " + 
+								           "'" + data[i].volume + "' as `volume`, " + 
+								           "'" + data[i].avg + "' as `avg` " +
+								") as tmp " + 
+								"where `tmp`.`date` not in ( " +
+								    "select `date` " +
+								    "from `" + table + "` " + 
+								    "where `date` = '" + data[i].date + "' " +
+								") ";
 
 							console.log('Insert data - SQL : ' + insert)
 							log.append('./log/', 'dblog.txt', 'Insert data - SQL : ' + insert, true);
